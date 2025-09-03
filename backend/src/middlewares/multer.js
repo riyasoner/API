@@ -11,7 +11,6 @@ const storage = multer.diskStorage({
     } else if (file.fieldname === "productImage") {
       uploadPath = path.join(__dirname, "../../public/productImage");
     } else if (file.fieldname.startsWith("variantImage")) {
-      // accept variantImage_0, variantImage_1, etc.
       uploadPath = path.join(__dirname, "../../public/variantImage");
     } else {
       return cb(new Error("Invalid fieldname"));

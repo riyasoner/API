@@ -1,6 +1,5 @@
 const db = require("../../../config/config");
 const { Product, Variant } = db;
-
 exports.createProduct = async (req, res) => {
   try {
     const { title, description } = req.body;

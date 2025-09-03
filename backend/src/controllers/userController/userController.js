@@ -2,6 +2,8 @@ const db = require("../../../config/config");
 const bcrypt = require("bcryptjs");
 const nodemailer = require("nodemailer");
 const User = db.User;
+const jwt = require("jsonwebtoken");
+
 exports.signup = async (req, res) => {
   try {
     const { name, email, password, confirmPassword } = req.body;
@@ -27,9 +29,8 @@ exports.signup = async (req, res) => {
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Generate 6-digit OTP
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
-    const otpExpires = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes expiry
+    const otpExpires = new Date(Date.now() + 10 * 60 * 1000);
 
     const user = await User.create({
       name,
@@ -39,7 +40,6 @@ exports.signup = async (req, res) => {
       otpExpires,
     });
 
-    // Send OTP email
     const transporter = nodemailer.createTransport({
       service: "Gmail",
       auth: { user: process.env.EMAIL_USER, pass: process.env.EMAIL_PASS },
@@ -99,8 +99,6 @@ exports.verifyOtp = async (req, res) => {
       .json({ status: false, message: "Internal Server Error" });
   }
 };
-const jwt = require("jsonwebtoken");
-const db = require("../../../config/config");
 
 exports.login = async (req, res) => {
   try {
@@ -109,12 +107,6 @@ exports.login = async (req, res) => {
     const user = await User.findOne({ where: { email } });
     if (!user) {
       return res.status(404).json({ status: false, message: "User not found" });
-    }
-
-    if (!user.isVerified) {
-      return res
-        .status(400)
-        .json({ status: false, message: "Email not verified" });
     }
 
     const isMatch = await bcrypt.compare(password, user.password);
